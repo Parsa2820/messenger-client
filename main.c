@@ -81,7 +81,6 @@ void readJson(){
 
 int mainMenu() {
     while (true){
-while (true){
         command = 1;
         system("clear");
         while (true)
