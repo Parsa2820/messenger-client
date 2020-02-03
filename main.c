@@ -5,13 +5,14 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "JSONc.c"
+#include "getch.c"
 #define MAX 101 //This is size of strings
 #define altMAX 100001 //This is alternative MAX for string size
 #define PORT 12345 //Server listener port
 #define SA struct sockaddr 
 
 char buffer[altMAX], username[MAX], password[MAX], authToken[MAX], 
-respondType[MAX], respondContent[MAX], channelName[MAX];
+respondType[MAX], respondContent[MAX], channelName[MAX], keyPress;
 int clientSocket, command;
 bool logedIn = false, inChannel = false; //Status booleans
 
@@ -35,9 +36,9 @@ void leaveChannel();
 void readMessage();//Read messages json and print it to terminal
 void readMembers();//Read members json and print it to terminal
 void searchMembers();
+void pointerCheck(int optionNum);
 
 int main(){
-    printf("\nMessenger ver 1\n\n");
     if (!mainMenu()) return 0;
     return 0;
 }
@@ -80,13 +81,27 @@ void readJson(){
 
 int mainMenu() {
     while (true){
-        printf("\n---Main menu---\n\n");
-        printf("1 - Signup\n");
-        printf("2 - Login\n");
-        printf("3 - Quit\n");
-        printf("4 - About\n\n");
-        printf("Enter your command number and then press enter : ");
-        scanf("%d", &command);
+while (true){
+        command = 1;
+        system("clear");
+        while (true)
+        {
+            printf("\n---Main menu---\n\n");
+            pointerCheck(1);
+            printf("Signup\n");
+            pointerCheck(2);
+            printf("Login\n");
+            pointerCheck(3);
+            printf("Quit\n");
+            pointerCheck(4);
+            printf("About\n\n");
+            pointerCheck(-1);
+            keyPress = getch();
+            if (keyPress == 115) command++;
+            if (keyPress == 119) command--;
+            if (keyPress == '\n') break;
+            system("clear");
+        }
         switch (command) {
             case 1:
                 signup();
@@ -109,9 +124,9 @@ int mainMenu() {
 
 void signup() {
     printf("\nEnter your username : ");
-    scanf("%s", username);
+    scanf("%s%*c", username);
     printf("Enter your password : ");
-    scanf("%s", password);
+    scanf("%s%*c", password);
     //Making request
     memset(buffer, 0, sizeof(buffer));//Clearing buffer
     strcat(buffer, "register ");
@@ -126,13 +141,14 @@ void signup() {
         printf("\nError : %s\n", respondContent);
     if (!strcmp(respondType, "Successful"))
         printf("\nYou successfully signed up\n");
+    getchar();
 }
 
 void login() {
     printf("\nEnter your username : ");
-    scanf("%s", username);
+    scanf("%s%*c", username);
     printf("Enter your password : ");
-    scanf("%s", password);
+    scanf("%s%*c", password);
     //Making request
     memset(buffer, 0, sizeof(buffer));//Clearing buffer
     strcat(buffer, "login ");
@@ -143,12 +159,15 @@ void login() {
     //End of making request
     sendAndRecv();
     readJson();
-    if (!strcmp(respondType, "Error"))
+    if (!strcmp(respondType, "Error")){
         printf("\nError : %s\n", respondContent);
+        getchar();
+    }
     else if (!strcmp(respondType, "AuthToken")){
 	    memset(authToken, 0, sizeof(authToken));
         strcat(authToken, respondContent);
         printf("\nYou successfully loged in\n");
+        getchar();
         logedIn = true;//Change logedIn state
         dashboard();
     }
@@ -158,16 +177,29 @@ void about(){
     printf("\nMessenger version 1.00 client\n");
     printf("Written in C by Parsa Mohammadian\n");
     printf("https://github.com/Parsa2820\n");
+    getchar();
 }
 
 void dashboard(){
     while(logedIn){
-        printf("\n---User dashboard---\n\n");
-        printf("1 - Create a channel\n");
-        printf("2 - Join a channel\n");
-        printf("3 - Logout\n");
-        printf("\nEnter your command number and then press enter : ");
-        scanf("%d", &command);
+command = 1;
+        system("clear");
+        while(true)
+        {
+            printf("\n---User dashboard---\n\n");
+            pointerCheck(1);
+            printf("Create a channel\n");
+            pointerCheck(2);
+            printf("Join a channel\n");
+            pointerCheck(3);
+            printf("Logout\n");
+            pointerCheck(-1);
+            keyPress = getch();
+            if (keyPress == 115) command++;
+            if (keyPress == 119) command--;
+            if (keyPress == '\n') break;
+            system("clear");
+        }
         switch (command)
         {
         case 1:
@@ -188,7 +220,7 @@ void dashboard(){
 
 void creatChannel(){
     printf("\nEnter channel name : ");
-    scanf("%s", channelName);
+    scanf("%s%*c", channelName);
     //Making request
     memset(buffer, 0, sizeof(buffer));//Clear buffer
     strcat(buffer, "create channel ");
@@ -199,18 +231,21 @@ void creatChannel(){
     //End of making request
     sendAndRecv();
     readJson();
-    if (!strcmp(respondType, "Error"))
+    if (!strcmp(respondType, "Error")){
         printf("\nError : %s\n", respondContent);
+        getchar();
+    }
     else if (!strcmp(respondType, "Successful")){
         printf("\nChannel created successfully\n");
         inChannel = true;//Change inChannel state
+        getchar();
         chatMenu();
     }
 }
 
 void joinChannel(){
     printf("\nEnter channel name : ");
-    scanf("%s", channelName);
+    scanf("%s%*c", channelName);
     //Making request
     memset(buffer, 0, sizeof(buffer));//Clearing buffer
     strcat(buffer, "join channel ");
@@ -221,11 +256,14 @@ void joinChannel(){
     //End of making request
     sendAndRecv();
     readJson();
-    if (!strcmp(respondType, "Error"))
+    if (!strcmp(respondType, "Error")){
         printf("\nError : %s\n", respondContent);
+        getchar();
+    }
     else if (!strcmp(respondType, "Successful")){
         printf("\nYou joined channel successfully\n");
         inChannel = true;//Change inChannel state
+        getchar();
         chatMenu();
     }
 }
@@ -245,18 +283,33 @@ void logout(){
         printf("You successfully loged out\n");
         logedIn = false;//Change logedIn state
     }
+    getchar();
 }
 
 void chatMenu(){
     while(inChannel){
-        printf("\n---Chat menu---\n\n");
-        printf("1 - Send message\n");
-        printf("2 - Refresh messages\n");
-        printf("3 - Channel members\n");
-        printf("4 - Leave channel\n");
-        printf("5 - Search members\n");
-        printf("\nEnter your command number and then press enter : ");
-        scanf("%d", &command);
+command = 1;
+        system("clear");
+        while (true)
+        {
+            printf("\n---Chat menu---\n\n");
+            pointerCheck(1);
+            printf("Send message\n");
+            pointerCheck(2);
+            printf("Refresh messages\n");
+            pointerCheck(3);
+            printf("Channel members\n");
+            pointerCheck(4);
+            printf("Leave channel\n");
+            pointerCheck(5);
+            printf("Search members\n");
+            pointerCheck(-1);
+            keyPress = getch();
+            if (keyPress == 115) command++;
+            if (keyPress == 119) command--;
+            if (keyPress == '\n') break;
+            system("clear");
+        }
         switch (command)
         {
         case 1:
@@ -284,7 +337,7 @@ void chatMenu(){
 void sendMessage(){
     char message[altMAX];
     printf("\nEnter your message and press enter : ");
-    scanf("%*c%[^\n]", message);
+    scanf("%[^\n]%*c", message);
     //Making request
     memset(buffer, 0, sizeof(buffer));//Clearing buffer
     strcat(buffer, "send ");
@@ -295,8 +348,10 @@ void sendMessage(){
     //End of making request
     sendAndRecv();
     readJson();
-    if (!strcmp(respondType, "Error"))
+    if (!strcmp(respondType, "Error")){
         printf("\nError : %s\n", respondContent);
+        getchar();
+    }
 }
 
 void refreshChannel(){
@@ -336,6 +391,7 @@ void leaveChannel(){
         printf("You successfully leaved channel\n");
         inChannel = false;//Change inChannel state
     }
+    getchar();
 }
 
 void readMessage(){
@@ -355,6 +411,7 @@ void readMessage(){
         JSONc_getObjectItem(message, "content")->stringVal);//So long. nah?:green:
     }
     JSONc_delete(respond);
+    getchar();
 }
 
 void readMembers(){
@@ -369,6 +426,7 @@ void readMembers(){
     for (int i = 0; i < size; i++)
         printf("\t%d - %s\n", i+1, JSONc_getArrayItem(membersList, i)->stringVal);
     JSONc_delete(respond);
+    getchar();
 }
 
 void searchMembers()
@@ -395,4 +453,13 @@ void searchMembers()
         else 
             printf("\nThis user is not in this channel\n");
     }
+    getchar();
+}
+
+void pointerCheck(int optionNum)
+{
+    if (command == optionNum)
+        printf("\033[1;31m");
+    else
+        printf("\033[0m");
 }

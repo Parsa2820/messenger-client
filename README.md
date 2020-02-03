@@ -22,6 +22,7 @@
     * [readMessage](#readMessage)
     * [readMembers](#readMembers)
     * [searchMembers](#searchMembers)
+    * [pointerCheck](#pointerCheck)
 * [Defualt port and IP address](#Defualt-port-and-IP-address)
 
 
@@ -165,6 +166,12 @@ This function print member from json array of strings to console.
 void searchMembers();
 ```
 This function get keysername from user and send request for matching channel members username of user current channel. Then print the result.
+
+### pointerCheck
+```c
+void pointerCheck(int optionNum);
+```
+Check if command number is equal to given option number and if it was, it change the printf text colour to red and else it turn it to normal text.
 
 ## Defualt port and IP address
 For this client defualts are as listed below
